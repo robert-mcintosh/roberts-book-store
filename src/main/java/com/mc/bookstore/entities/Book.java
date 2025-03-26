@@ -26,5 +26,12 @@ public class Book {
   private double price;
   
   @Column(nullable = false)
-  private String type; // New Release, Regular, Old Edition
+  private String type; // NEW Release, REQular, OLD Edition
+
+  public Book(String title, String author, double price, String type) {
+    this.title = title;
+    this.author = author;
+    this.price = price;
+    this.type = type;
+  }
 }
