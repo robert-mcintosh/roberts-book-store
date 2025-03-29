@@ -1,11 +1,12 @@
+package ControllerTests;
+
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.mc.bookstore.RobertsBookStoreApplication;
 import com.mc.bookstore.controllers.BookController;
 import com.mc.bookstore.model.entities.Book;
 import com.mc.bookstore.model.requests.BookRq;
@@ -20,11 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BookController.class)
+@ContextConfiguration(classes = RobertsBookStoreApplication.class)
 public class BookControllerTests {
 
   @Autowired private MockMvc mockMvc;
@@ -58,7 +61,7 @@ public class BookControllerTests {
   @Test
   public void testAddBook() throws Exception {
     // Arrange
-    Book book = new Book(1L, "Title1", "Author1", 5, 100.0, "REG");
+    Book book = new Book(null, "Title1", "Author1", 5, 100.0, "REG");
 
     BookRq bookRq = populateBookRqFromBook(book);
     BookRecord bookRecord = new BookRecord().populateFromBook(book);
@@ -73,8 +76,8 @@ public class BookControllerTests {
                 .content(
                     "{\"title\":\"Title1\",\"author\":\"Author1\",\"price\":100.0,\"type\":\"REG\",\"qty\":5}"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.title").value("Title1"))
-        .andExpect(jsonPath("$.author").value("Author1"));
+        .andExpect(jsonPath("title").value("Title1"))
+        .andExpect(jsonPath("author").value("Author1"));
   }
 
   @Test
@@ -86,17 +89,43 @@ public class BookControllerTests {
     mockMvc.perform(delete("/api/books/1")).andExpect(status().isOk());
   }
 
+  @Test
+  public void testUpdateBook() throws Exception {
+    // Arrange
+    Book book = new Book(1L, "UpdatedTitle", "UpdatedAuthor", 7, 120.0, "REG");
+    BookRq bookRq = populateBookRqFromBook(book);
+    BookRecord updatedBookRecord = new BookRecord().populateFromBook(book);
 
-  private static BookRq populateBookRqFromBook(Book book) {
-    BookRq bookRq =
-            new BookRq(
-                    book.getId(),
-                    book.getTitle(),
-                    book.getAuthor(),
-                    book.getQty(),
-                    book.getPrice(),
-                    book.getType());
-    return bookRq;
+    when(bookService.updateBook(bookRq)).thenReturn(updatedBookRecord);
+
+    // Act & Assert
+    mockMvc
+        .perform(
+            put("/api/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"id\":1,\"title\":\"UpdatedTitle\",\"author\":\"UpdatedAuthor\",\"price\":120.0,\"type\":\"REG\",\"qty\":7}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id").value(1))
+        .andExpect(jsonPath("title").value("UpdatedTitle"))
+        .andExpect(jsonPath("author").value("UpdatedAuthor"))
+        .andExpect(jsonPath("price").value(120.0))
+        .andExpect(jsonPath("type").value("REG"))
+        .andExpect(jsonPath("qty").value(7));
   }
 
+  /*
+   * static methods
+   */
+  private static BookRq populateBookRqFromBook(Book book) {
+    BookRq bookRq =
+        new BookRq(
+            book.getId(),
+            book.getTitle(),
+            book.getAuthor(),
+            book.getQty(),
+            book.getPrice(),
+            book.getType());
+    return bookRq;
+  }
 }

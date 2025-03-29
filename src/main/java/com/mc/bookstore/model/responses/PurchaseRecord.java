@@ -4,15 +4,14 @@ import com.mc.bookstore.model.entities.Purchase;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 
 @Data
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class PurchaseRecord  {
 
   private Long purchaseId = null;

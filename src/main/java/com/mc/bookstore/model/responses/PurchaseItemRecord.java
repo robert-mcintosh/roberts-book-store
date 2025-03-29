@@ -2,10 +2,7 @@ package com.mc.bookstore.model.responses;
 
 import com.mc.bookstore.model.entities.Purchase;
 import com.mc.bookstore.model.entities.PurchaseItem;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.FetchType;
@@ -17,6 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class PurchaseItemRecord  {
 
   private Long id;
