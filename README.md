@@ -62,7 +62,7 @@ To get the application up and running, follow these steps:
    ```
 
 6. **Open in browser**:
-   Access the application at `http://localhost:8080/swagger-ui/index.html` (if applicable).
+   Access the application at `http://localhost:8080/swagger-ui/index.html`
 
 ## Usage
 
