@@ -1,65 +1,156 @@
 package com.mc.bookstore.service;
 
-import com.mc.bookstore.entities.Book;
-import com.mc.bookstore.entities.Customer;
-import com.mc.bookstore.entities.Purchase;
+import com.mc.bookstore.config.exceptions.NotFoundException;
+import com.mc.bookstore.model.beans.PurchaseRecord;
+import com.mc.bookstore.model.entities.*;
 import com.mc.bookstore.repository.BookRepository;
 import com.mc.bookstore.repository.DiscountRepository;
+import com.mc.bookstore.repository.PurchaseItemRepository;
 import com.mc.bookstore.repository.PurchaseRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.*;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class PurchaseService {
-  @Autowired private PurchaseRepository purchaseRepository;
-  @Autowired private BookRepository bookRepository;
-  @Autowired private DiscountRepository discountRepository;
-  @Autowired private CustomerService customerService;
 
-  public Purchase makePurchase(Long customerId, List<Long> bookIds) {
+  private final PurchaseRepository purchaseRepository;
+  private final PurchaseItemRepository purchaseItemRepository;
+  private final BookRepository bookRepository;
+  private final DiscountRepository discountRepository;
+
+  private final CustomerService customerService;
+
+  public PurchaseService(
+      PurchaseRepository purchaseRepository,
+      PurchaseItemRepository purchaseItemRepository,
+      BookRepository bookRepository,
+      DiscountRepository discountRepository,
+      CustomerService customerService) {
+    this.purchaseRepository = purchaseRepository;
+    this.purchaseItemRepository = purchaseItemRepository;
+    this.bookRepository = bookRepository;
+    this.discountRepository = discountRepository;
+    this.customerService = customerService;
+  }
+
+  /**
+   * Retrieves the purchase record for the specified purchase ID.
+   * This method fetches the purchase details and associated purchase items
+   * and converts them into a {@link PurchaseRecord}.
+   *
+   * @param id the ID of the purchase to retrieve
+   * @return the {@link PurchaseRecord} containing the purchase details and items
+   * @throws NotFoundException if the purchase or associated purchase items cannot be found
+   */
+  public PurchaseRecord getPurchase(Long id) {
+
+    // get the PURCHASE
+    Purchase purchase = purchaseRepository.findById(id).orElse(null);
+    if (purchase == null) throw new NotFoundException("Purchase does not exist!");
+
+//    get the PURCHASE_ITEMS
+    List<PurchaseItem> purchaseItems = purchaseItemRepository.findByPurchaseId(id);
+    if (CollectionUtils.isEmpty(purchaseItems)) throw new NotFoundException("Purchase items not found!");
+
+    return toPurchaseRecord(purchase, purchaseItems);
+
+  }
+
+  public PurchaseRecord makePurchase(Long customerId, List<Long> bookIds) {
+
+    // get customer info
     Customer customer = customerService.getCustomer(customerId);
-    List<Book> books = (List<Book>) bookRepository.findAllById(bookIds);
-    double totalPrice = calculateTotalPrice(books);
-    Purchase purchase = new Purchase();
-    purchase.setCustomerId(customer.getId());
-    purchase.setBooks(books);
-    purchase.setTotalPrice(totalPrice);
-    customer.setLoyaltyPoints(customer.getLoyaltyPoints() + books.size());
-    customerService.updateLoyaltyPoints(customerId, customer.getLoyaltyPoints());
-    return purchaseRepository.save(purchase);
-  }
 
-  public double calculateTotalPrice(List<Book> books) {
-    // Implement pricing logic based on book type and bundle discounts
-    // todo
-    return 0;
-  }
+    //    get books
+    List<Book> books = bookRepository.findAllById(bookIds);
 
-  /*
-  private double calculateTotalPrice(List<Book> books) {
-        double totalPrice = 0.0;
-        Map<String, Long> bookTypeCounts = books.stream()
-                .collect(Collectors.groupingBy(Book::getType, Collectors.counting()));
+    // populate basics of book and save it to get a purchaseId
+    PurchaseRecord purchaseRecord = new PurchaseRecord();
+    purchaseRecord.setCustomerId(customer.getId());
 
-        for (Book book : books) {
-            Optional<Discount> discountOpt = discountRepository.findByBookType(book.getType());
-            if (discountOpt.isPresent()) {
-                Discount discount = discountOpt.get();
-                double discountPercentage = discount.getDiscountPercentage();
-                double bundleDiscountPercentage = discount.getBundleDiscountPercentage();
-                double bookPrice = book.getPrice();
-
-                if (bookTypeCounts.get(book.getType()) >= 3) {
-                    bookPrice -= bookPrice * (bundleDiscountPercentage / 100);
-                }
-                bookPrice -= bookPrice * (discountPercentage / 100);
-                totalPrice += bookPrice;
-            }
-        }
-        return totalPrice;
+    {// save to generate an ID for the purchase
+      Purchase temporaryPurchase = purchaseRecord;
+      purchaseRepository.saveAndFlush(temporaryPurchase);
+      purchaseRecord.setPurchaseId(temporaryPurchase.getPurchaseId());
     }
 
+    double totalDiscountedPrice = calculateTotalPrice(purchaseRecord, books);
+    purchaseRecord.setTotalPrice(totalDiscountedPrice);
+
+    // increment loyalty points
+    customer.setLoyaltyPoints(customer.getLoyaltyPoints() + books.size());
+    customerService.updateLoyaltyPoints(customerId, customer.getLoyaltyPoints());
+
+    purchaseRepository.saveAndFlush(purchaseRecord);
+    purchaseItemRepository.saveAll(purchaseRecord.getItems());
+
+    return purchaseRecord;
+  }
+
+  public Purchase refund(Long purchaseId) {
+    Purchase purchase = purchaseRepository.getReferenceById(purchaseId);
+    if (purchase == null) throw new NotFoundException("Purchase does not exist!");
+
+    // todo add refund logic
+    return null;
+  }
+
+  private double calculateTotalPrice(PurchaseRecord purchaseRecord, List<Book> books) {
+    double totalDiscountPrice = 0.0;
+
+    // save to generate an ID for the purchase
+    //    purchaseRepository.save(purchase);
+
+    // ASSUMPTION: bulk discount is applied on cart size, not quantity of a particular type
+    boolean qualifiesForBulkDiscount = books.size() >= 3;
+
+    for (Book book : books) {
+      PurchaseItem item = new PurchaseItem();
+      item.setPurchaseId(purchaseRecord.getPurchaseId());
+      item.setBookId(book.getId());
+      item.setPrice(book.getPrice());
+
+      Optional<Discount> discountOpt = discountRepository.findByBookType(book.getType());
+      if (discountOpt.isPresent()) {
+        Discount discount = discountOpt.get();
+        double bookPrice = book.getPrice();
+
+        double discountPercentage = discount.getDiscountPercentage();
+        if (qualifiesForBulkDiscount) {
+          discountPercentage += discount.getBundleDiscountPercentage();
+        }
+
+        double newBookPrice = bookPrice - (bookPrice * (discountPercentage / 100));
+        totalDiscountPrice += newBookPrice;
+
+        item.setDiscountPrice(newBookPrice);
+      }
+      purchaseRecord.addItem(item);
+    }
+
+    return totalDiscountPrice;
+  }
+
+  /**
+   * Creates a PurchaseRecord from the provided entities
+   *
+   * @param purchase      the purchase entity
+   * @param purchaseItems the associated purchase items
+   * @return a populated PurchaseRecord
    */
+  private PurchaseRecord toPurchaseRecord(Purchase purchase, List<PurchaseItem> purchaseItems) {
+    PurchaseRecord purchaseRecord = new PurchaseRecord();
+    purchaseRecord.setPurchaseId(purchase.getPurchaseId());
+    purchaseRecord.setCustomerId(purchase.getCustomerId());
+    purchaseRecord.setTotalPrice(purchase.getTotalPrice());
+    purchaseRecord.setItems(purchaseItems); // Populate items
+
+    // add customer info to the record
+    Customer customer = customerService.getCustomer(purchaseRecord.getCustomerId());
+    if( customer != null ) purchaseRecord.setCustomerInfo(customer);
+
+    return purchaseRecord;
+  }
+
 }

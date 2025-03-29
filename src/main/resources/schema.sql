@@ -1,11 +1,25 @@
+
+DROP TABLE IF EXISTS Book;
+DROP TABLE IF EXISTS Customer;
+DROP TABLE IF EXISTS Purchase;
+DROP TABLE IF EXISTS Purchase_Item;
+DROP TABLE IF EXISTS Discount;
+
 CREATE TABLE Book (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     author VARCHAR(255),
-    price DECIMAL(10, 2),
-    type CHAR(3) NOT NULL
+    price DECIMAL(10, 2) NOT NULL,
+    type CHAR(3) NOT NULL,
+    qty INT NOT NULL
 );
 
+CREATE TABLE Discount (
+    book_type CHAR(3) PRIMARY KEY,
+    description VARCHAR(100) NOT NULL,
+    discount_percentage DECIMAL(10, 2) NOT NULL,
+    bundle_discount_percentage DECIMAL(10, 2) NOT NULL
+);
 
 CREATE TABLE Customer (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -13,17 +27,17 @@ CREATE TABLE Customer (
     loyalty_points INT NOT NULL
 );
 
+
 CREATE TABLE Purchase (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    customerId INT NOT NULL,
-    books VARCHAR(255),
-    totalPrice DECIMAL(10, 2) NOT NULL
+    purchase_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    refunded CHAR(1)  DEFAULT 'N'
 );
-
-
-CREATE TABLE Discount (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    bookType CHAR(3) NOT NULL,
-    discountPercentage DECIMAL(10, 2) NOT NULL,
-    bundleDiscountPercentage DECIMAL(10, 2) NOT NULL,
-)
+CREATE TABLE Purchase_Item (
+    id INT PRIMARY KEY AUTO_INCREMENT ,
+    purchase_id BIGINT,
+    book_id BIGINT,
+    price DOUBLE,
+    discount_price DOUBLE
+);

@@ -1,6 +1,6 @@
 package com.mc.bookstore.service;
 
-import com.mc.bookstore.entities.Customer;
+import com.mc.bookstore.model.entities.Customer;
 import com.mc.bookstore.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
