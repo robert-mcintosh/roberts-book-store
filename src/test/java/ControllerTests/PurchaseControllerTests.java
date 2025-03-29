@@ -1,30 +1,21 @@
 package ControllerTests;
 
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.mc.bookstore.RobertsBookStoreApplication;
-import com.mc.bookstore.controllers.BookController;
 import com.mc.bookstore.controllers.PurchaseController;
-import com.mc.bookstore.model.entities.Book;
 import com.mc.bookstore.model.entities.Customer;
-import com.mc.bookstore.model.requests.BookRq;
+import com.mc.bookstore.model.entities.Purchase;
 import com.mc.bookstore.model.requests.PurchaseRq;
-import com.mc.bookstore.model.responses.BookRecord;
 import com.mc.bookstore.model.responses.CustomerRecord;
 import com.mc.bookstore.model.responses.PurchaseItemRecord;
 import com.mc.bookstore.model.responses.PurchaseRecord;
-import com.mc.bookstore.service.BookService;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.mc.bookstore.service.PurchaseService;
+import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,18 +55,56 @@ public class PurchaseControllerTests {
     mockMvc
         .perform(get("/api/purchases").param("purchaseId", "1"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath(".purchaseId").value(1))
-        .andExpect(jsonPath(".customerId").value(2))
-        .andExpect(jsonPath(".purchaseItems.purchaseId[0]").value(1))
-        .andExpect(jsonPath(".purchaseItems.price[1]").value(100))
-        .andExpect(jsonPath(".customerInfo.name").value("James"));
+        .andExpect(jsonPath("$.purchaseId").value(1))
+        .andExpect(jsonPath("$.customerId").value(2))
+        .andExpect(jsonPath("$.totalPrice").value(200.0))
+        .andExpect(jsonPath("$.refunded").value(false))
+        .andExpect(jsonPath("$.purchaseItems[0].id").value(1))
+        .andExpect(jsonPath("$.purchaseItems[0].purchaseId").value(1))
+        .andExpect(jsonPath("$.purchaseItems[0].price").value(100.0))
+        .andExpect(jsonPath("$.purchaseItems[0].discountPrice").value(100.0))
+        .andExpect(jsonPath("$.purchaseItems[1].id").value(2))
+        .andExpect(jsonPath("$.purchaseItems[1].purchaseId").value(1))
+        .andExpect(jsonPath("$.purchaseItems[1].price").value(100.0))
+        .andExpect(jsonPath("$.purchaseItems[1].discountPrice").value(100.0))
+        .andExpect(jsonPath("$.customerInfo.name").value("James"))
+        .andExpect(jsonPath("$.customerInfo.loyaltyPoints").value(1));
   }
 
   @Test
-  public void testMakeAPurchase() throws Exception {}
+  public void testMakeAPurchase() throws Exception {
+    // Arrange
+    Purchase purchase = new Purchase();
+    purchase.setCustomerId(1L);
+    purchase.setTotalPrice(100D);
+    purchase.setRefunded(false);
 
-  @Test
-  public void testRefundPurchase() throws Exception {}
+    PurchaseRq purchaseRq = new PurchaseRq();
+    purchaseRq.setCustomerId(purchase.getCustomerId());
+    purchaseRq.setBookIds(Arrays.asList(1L, 2L));
 
+    PurchaseRecord purchaseRecord = new PurchaseRecord().populateFromPurchase(purchase);
+    purchaseRecord.getPurchaseItems().add(new PurchaseItemRecord(1L, 1L, 1L, 100, 100));
+    purchaseRecord.getPurchaseItems().add(new PurchaseItemRecord(1L, 1L, 2L, 100, 100));
+    purchaseRecord.setCustomerInfo(
+        new CustomerRecord().populateFromCustomer(new Customer("James", 0)));
 
+    when(purchaseService.makePurchase(1L, purchaseRq.getBookIds())).thenReturn(purchaseRecord);
+
+    // Act & Assert
+    mockMvc
+        .perform(
+            post("/api/purchases")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"customerId\": 1, \"bookIds\": [1, 2]}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.customerId").value(1))
+        .andExpect(jsonPath("$.totalPrice").value(100.0))
+        .andExpect(jsonPath("$.refunded").value(false))
+        .andExpect(jsonPath("$.purchaseItems[0].id").value(1))
+        .andExpect(jsonPath("$.purchaseItems[0].price").value(100.0))
+        .andExpect(jsonPath("$.purchaseItems[1].id").value(1))
+        .andExpect(jsonPath("$.purchaseItems[1].price").value(100.0))
+        .andExpect(jsonPath("$.customerInfo.name").value("James"));
+  }
 }
