@@ -64,6 +64,8 @@ To get the application up and running, follow these steps:
 6. **Open in browser**:
    Access the application at `http://localhost:8080/swagger-ui/index.html`
 
+   ![img.png](img.png)
+
 ## Usage
 
 Once the application is running, users can interact with it to:
@@ -72,6 +74,11 @@ Once the application is running, users can interact with it to:
 - View and modify the book types/categories that determine the discounts
 - View the customer information
 - Purchase books, view purchase orders, and refunds
+
+Assumptions made along the way:
+
+- The discount is applied on the cart size - not the quantity if any particular type
+- Loyalty points cannot be used immediately, i.e. they get redeemed before the latest order accrues
 
 ## Contributing
 
