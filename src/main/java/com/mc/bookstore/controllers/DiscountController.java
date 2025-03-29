@@ -4,6 +4,8 @@ import com.mc.bookstore.model.entities.Discount;
 
 import java.util.List;
 
+import com.mc.bookstore.model.requests.DiscountRq;
+import com.mc.bookstore.model.responses.DiscountRecord;
 import com.mc.bookstore.service.DiscountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,13 +20,13 @@ public class DiscountController {
 
   @GetMapping
   @Operation(summary = "Get all book discounts")
-  public List<Discount> getAllDiscounts() {
+  public List<DiscountRecord> getAllDiscounts() {
     return discountService.getAllDiscounts();
   }
 
   @PutMapping
   @Operation(summary = "Update a discount")
-  public Discount updateDiscount(Discount discount) {
-    return discountService.updateDiscount(discount);
+  public DiscountRecord updateDiscount(@RequestBody DiscountRq discountRq) {
+    return discountService.updateDiscount(discountRq);
   }
 }

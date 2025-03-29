@@ -18,4 +18,13 @@ public class Discount {
   private String description;
   private double discountPercentage;
   private double bundleDiscountPercentage;
+  private char loyaltyEligible;
+
+  public boolean getLoyaltyEligible() {
+    return loyaltyEligible == 'Y';
+  }
+
+  public void setLoyaltyEligible(boolean loyaltyEligible) {
+    this.loyaltyEligible = loyaltyEligible ? 'Y' : 'N';
+  }
 }

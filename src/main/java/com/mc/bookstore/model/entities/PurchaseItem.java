@@ -20,7 +20,7 @@ public class PurchaseItem {
   @Column(name = "purchase_id")
   private Long purchaseId;
 
-  @ManyToOne(targetEntity = Purchase.class, fetch = FetchType.EAGER) //
+  @ManyToOne(targetEntity = Purchase.class, fetch = FetchType.EAGER)
   @JoinColumn(name = "purchase", nullable = true) // Foreign key
   private Purchase purchase;
 

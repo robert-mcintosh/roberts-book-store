@@ -46,11 +46,9 @@ public class Purchase {
 
   public void addItem(PurchaseItem item) {
     items.add(item);
-    item.setPurchase(this);
   }
 
   public void removeItem(PurchaseItem item) {
     items.remove(item);
-    item.setPurchase(null);
   }
 }

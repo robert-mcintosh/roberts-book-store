@@ -1,6 +1,7 @@
 package com.mc.bookstore.controllers;
 
 import com.mc.bookstore.model.entities.Customer;
+import com.mc.bookstore.model.responses.CustomerRecord;
 import com.mc.bookstore.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +19,7 @@ public class CustomerController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Get a customer by id")
-  public Customer getCustomer(@PathVariable Long id) {
-    return customerService.getCustomer(id);
+  public CustomerRecord getCustomer(@PathVariable Long id) {
+    return customerService.getCustomerRecord(id);
   }
 }

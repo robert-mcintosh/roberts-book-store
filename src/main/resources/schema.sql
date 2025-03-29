@@ -18,7 +18,8 @@ CREATE TABLE Discount (
     book_type CHAR(3) PRIMARY KEY,
     description VARCHAR(100) NOT NULL,
     discount_percentage DECIMAL(10, 2) NOT NULL,
-    bundle_discount_percentage DECIMAL(10, 2) NOT NULL
+    bundle_discount_percentage DECIMAL(10, 2) NOT NULL,
+    loyalty_eligible CHAR(1) DEFAULT 'N'
 );
 
 CREATE TABLE Customer (
@@ -27,13 +28,13 @@ CREATE TABLE Customer (
     loyalty_points INT NOT NULL
 );
 
-
 CREATE TABLE Purchase (
     purchase_id INT PRIMARY KEY AUTO_INCREMENT,
     customer_id INT NOT NULL,
     total_price DECIMAL(10, 2) NOT NULL,
     refunded CHAR(1)  DEFAULT 'N'
 );
+
 CREATE TABLE Purchase_Item (
     id INT PRIMARY KEY AUTO_INCREMENT ,
     purchase_id BIGINT,
