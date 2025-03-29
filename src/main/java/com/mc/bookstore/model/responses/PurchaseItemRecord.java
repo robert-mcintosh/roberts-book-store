@@ -1,28 +1,20 @@
 package com.mc.bookstore.model.responses;
 
-import com.mc.bookstore.model.entities.Purchase;
 import com.mc.bookstore.model.entities.PurchaseItem;
 import lombok.*;
-
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import java.util.List;
 
 @Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseItemRecord  {
+public class PurchaseItemRecord {
 
   private Long id;
   private Long purchaseId;
   private Long bookId;
   private double price;
   private double discountPrice;
-
 
   public PurchaseItemRecord populateFromPurchaseItem(PurchaseItem purchaseItem) {
     this.setId(purchaseItem.getId());

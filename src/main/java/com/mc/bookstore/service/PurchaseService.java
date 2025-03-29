@@ -34,12 +34,13 @@ public class PurchaseService {
   }
 
   /**
-   * Retrieves the purchase record for the specified purchase ID. This method fetches the purchase
-   * details and associated purchase items and converts them into a {@link PurchaseRecord}.
+   * Retrieves a purchase record by the given ID. This method fetches the purchase details from the
+   * database, ensures the related items are initialized, and converts the purchase entity into a
+   * purchase record.
    *
-   * @param id the ID of the purchase to retrieve
-   * @return the {@link PurchaseRecord} containing the purchase details and items
-   * @throws NotFoundException if the purchase or associated purchase items cannot be found
+   * @param id the unique identifier of the purchase to retrieve
+   * @return a {@link PurchaseRecord} containing the details of the purchase
+   * @throws NotFoundException if the purchase does not exist or if the purchase items are not found
    */
   public PurchaseRecord getPurchase(Long id) {
 
@@ -55,14 +56,15 @@ public class PurchaseService {
   }
 
   /**
-   * Creates a new purchase record for the specified customer and list of book IDs. This method
-   * validates stock availability, calculates the total price with discounts, updates book stock,
-   * increments customer loyalty points, and saves the purchase record.
+   * Processes a purchase for a given customer and a list of book IDs. This method retrieves the
+   * customer and book details, checks for stock availability, calculates the total price with
+   * applicable discounts, adjusts the book stock, updates customer loyalty points, and saves the
+   * purchase record.
    *
-   * @param customerId the ID of the customer making the purchase
-   * @param bookIds the list of book IDs to be purchased by the customer
-   * @return the {@link PurchaseRecord} containing details of the completed purchase
-   * @throws NotFoundException if any of the books are out of stock
+   * @param customerId the unique identifier of the customer making the purchase
+   * @param bookIds the list of unique identifiers for the books to be purchased
+   * @return a {@code PurchaseRecord} object containing the details of the processed purchase
+   * @throws NotFoundException if any of the specified books have insufficient stock
    */
   public PurchaseRecord makePurchase(Long customerId, List<Long> bookIds) {
 
@@ -85,6 +87,7 @@ public class PurchaseService {
     // save to generate an ID for the purchase
     purchaseRepository.saveAndFlush(purchase);
 
+    // calculate the total price based on various factors
     double totalDiscountedPrice = calculateTotalPrice(purchase, books, customer);
     purchase.setTotalPrice(totalDiscountedPrice);
 
@@ -101,14 +104,15 @@ public class PurchaseService {
   }
 
   /**
-   * Processes a refund for the given purchase ID. This method retrieves the purchase record by the
-   * specified ID and performs refund operations if applicable.
+   * Handles the refund process for a specified purchase. This method verifies the existence of the
+   * purchase, replenishes stock for the refunded items, deducts loyalty points from the customer,
+   * and marks the purchase as refunded.
    *
-   * @param purchaseId the ID of the purchase to be refunded
-   * @return the {@link PurchaseRecord} containing details of the refunded purchase
-   * @throws NotFoundException if the purchase with the given ID does not exist
+   * @param purchaseId the unique identifier of the purchase to be refunded
+   * @throws NotFoundException if the specified purchase does not exist
    */
   public void refund(Long purchaseId) {
+
     Purchase purchase = purchaseRepository.getReferenceById(purchaseId);
     if (purchase == null) throw new NotFoundException("Purchase does not exist!");
 
@@ -116,27 +120,27 @@ public class PurchaseService {
 
     AtomicInteger countOfItemsRefunded = new AtomicInteger(purchaseItems.size());
 
-    purchaseItems.forEach(item -> {
+    purchaseItems.forEach(
+        item -> {
 
-      // excluded any free books
-      if(item.getDiscountPrice() == 0)
-        countOfItemsRefunded.getAndDecrement();
+          // excluded any free books
+          if (item.getDiscountPrice() == 0) countOfItemsRefunded.getAndDecrement();
 
-      // need to replenish the book stock
-      Book book = bookRepository.findById(item.getBookId()).orElse(null);
-      if(book != null){
-        bookRepository.increaseStockByOne(book.getId());
-      }
-    });
+          // need to replenish the book stock
+          Book book = bookRepository.findById(item.getBookId()).orElse(null);
+          if (book != null) {
+            bookRepository.increaseStockByOne(book.getId());
+          }
+        });
 
     // deduct the loyalty points
     Customer customer = customerService.getCustomer(purchase.getCustomerId());
     customer.setLoyaltyPoints(customer.getLoyaltyPoints() - countOfItemsRefunded.get());
-    if(customer.getLoyaltyPoints() < 0) customer.setLoyaltyPoints(0);
+    if (customer.getLoyaltyPoints() < 0) customer.setLoyaltyPoints(0);
 
     customerService.updateLoyaltyPoints(customer.getId(), customer.getLoyaltyPoints());
 
-    // update purchase to refunded
+    // update purchase to REFUNDED
     purchase.setRefunded(true);
     purchaseRepository.saveAndFlush(purchase);
   }
@@ -144,18 +148,22 @@ public class PurchaseService {
   //  region private methods
 
   /**
-   * Calculates the total discounted price of a purchase, applying applicable discounts, loyalty
-   * points, and bulk discounts to the books in the purchase.
+   * Calculates the total discounted price for a purchase based on the provided list of books,
+   * customer loyalty points, and applicable discounts. Discount types and loyalty rules are applied
+   * to determine the final price.
    *
-   * @param purchase the purchase entity where the items are added
+   * @param purchase the purchase entity representing the ongoing transaction
    * @param books the list of books included in the purchase
-   * @param customer the customer making the purchase, whose loyalty points are updated
-   * @return the total price of the purchase after applying discounts and loyalty points
+   * @param customer the customer making the purchase, used for applying loyalty points
+   * @return the total discounted price for the purchase
    */
   private double calculateTotalPrice(Purchase purchase, List<Book> books, Customer customer) {
+    /*
+     * This is the brain of the operation
+    */
     double totalDiscountPrice = 0.0;
 
-    // get all the discount types and store them it a map to limit db access
+    // get all the discount types and store them in a map to limit db access
     Map<String, Discount> discountMap = new HashMap<>();
     discountRepository
         .findAll()
@@ -190,11 +198,10 @@ public class PurchaseService {
         if (qualifiesForBulkDiscount) {
           discountPercentage += discount.getBundleDiscountPercentage();
         }
+        double discountedPrice = bookPrice * (100 - discountPercentage) / 100;
+        totalDiscountPrice += discountedPrice;
 
-        double newBookPrice = bookPrice - (bookPrice * (discountPercentage / 100));
-        totalDiscountPrice += newBookPrice;
-
-        item.setDiscountPrice(newBookPrice);
+        item.setDiscountPrice(discountedPrice);
       }
       purchase.addItem(item);
     }
@@ -221,10 +228,13 @@ public class PurchaseService {
   }
 
   /**
-   * Converts a {@link Purchase} entity into a {@link PurchaseRecord} by adding customer details.
+   * Converts a {@link Purchase} into a {@link PurchaseRecord} by retrieving the associated
+   * {@link Customer} details and populating the {@link PurchaseRecord} with combined purchase
+   * and customer information.
    *
-   * @param purchase the purchase entity to convert
-   * @return a {@link PurchaseRecord} containing purchase and customer details
+   * @param purchase the purchase entity containing purchase details
+   * @return a {@link PurchaseRecord} containing combined purchase and customer information
+   * @throws RuntimeException if the customer associated with the purchase cannot be found
    */
   private PurchaseRecord toPurchaseRecord(Purchase purchase) {
     Customer customer = customerService.getCustomer(purchase.getCustomerId());

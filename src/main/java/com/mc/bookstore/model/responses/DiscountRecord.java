@@ -1,6 +1,5 @@
 package com.mc.bookstore.model.responses;
 
-import com.mc.bookstore.model.entities.Book;
 import com.mc.bookstore.model.entities.Discount;
 import lombok.Data;
 import lombok.Getter;
@@ -15,7 +14,7 @@ public class DiscountRecord extends Discount {
     this.setBookType(discount.getBookType());
     this.setDescription(discount.getDescription());
     this.setDiscountPercentage(discount.getDiscountPercentage());
-    this.setBundleDiscountPercentage(discount.getBundleDiscountPercentage( ));
+    this.setBundleDiscountPercentage(discount.getBundleDiscountPercentage());
     this.setLoyaltyEligible(discount.getLoyaltyEligible());
     return this;
   }

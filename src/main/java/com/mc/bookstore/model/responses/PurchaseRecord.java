@@ -4,7 +4,6 @@ import com.mc.bookstore.model.entities.Purchase;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
-
 import lombok.*;
 
 @Data
@@ -12,7 +11,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseRecord  {
+public class PurchaseRecord {
 
   private Long purchaseId = null;
   private Long customerId;

@@ -3,14 +3,13 @@ package com.mc.bookstore.model.entities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "book") // Maps this class to "book" table
+@Table(name = "book")
 @Getter
 @Setter
 @NoArgsConstructor

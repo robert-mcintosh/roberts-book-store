@@ -1,8 +1,6 @@
 package com.mc.bookstore.model.entities;
 
 import javax.persistence.*;
-
-import jdk.jfr.BooleanFlag;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

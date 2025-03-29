@@ -1,15 +1,13 @@
 package com.mc.bookstore.controllers;
 
-import com.mc.bookstore.model.entities.Book;
 import com.mc.bookstore.model.requests.BookRq;
 import com.mc.bookstore.model.responses.BookRecord;
 import com.mc.bookstore.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Books")
 @RestController

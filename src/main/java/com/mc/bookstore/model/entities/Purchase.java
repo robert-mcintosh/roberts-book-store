@@ -36,6 +36,10 @@ public class Purchase {
       targetEntity = PurchaseItem.class)
   private List<PurchaseItem> items = new ArrayList<>();
 
+  /*
+   * custom getters and setters
+   */
+
   public boolean getRefunded() {
     return refunded == 'Y';
   }

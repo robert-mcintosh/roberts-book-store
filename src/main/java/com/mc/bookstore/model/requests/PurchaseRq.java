@@ -1,11 +1,10 @@
 package com.mc.bookstore.model.requests;
 
+import java.io.Serializable;
+import java.util.List;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.List;
 
 @Data
 @Getter

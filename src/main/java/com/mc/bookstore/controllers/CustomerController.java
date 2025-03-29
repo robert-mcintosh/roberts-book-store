@@ -1,6 +1,5 @@
 package com.mc.bookstore.controllers;
 
-import com.mc.bookstore.model.entities.Customer;
 import com.mc.bookstore.model.responses.CustomerRecord;
 import com.mc.bookstore.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;

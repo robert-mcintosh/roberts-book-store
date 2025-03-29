@@ -1,8 +1,6 @@
 package com.mc.bookstore.model.responses;
 
-import com.mc.bookstore.model.entities.Book;
 import com.mc.bookstore.model.entities.Customer;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

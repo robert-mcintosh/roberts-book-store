@@ -19,6 +19,12 @@ import org.springframework.stereotype.Service;
 public class DiscountService {
   @Autowired private DiscountRepository discountRepository;
 
+  /**
+   * Retrieves a list of all discounts stored in the repository. Each discount is converted into a
+   * DiscountRecord instance before being added to the result.
+   *
+   * @return a list of DiscountRecord objects representing all discounts in the repository
+   */
   public List<DiscountRecord> getAllDiscounts() {
 
     List<DiscountRecord> discountRecords = new ArrayList<>();
@@ -29,6 +35,16 @@ public class DiscountService {
     return discountRecords;
   }
 
+  /**
+   * Updates the details of an existing discount based on the provided request data.
+   *
+   * @param discountRq the request object containing the details to update the discount, including
+   *     book type, description, discount percentage, bundle discount percentage, and loyalty
+   *     eligibility
+   * @return a DiscountRecord object populated with the updated discount details
+   * @throws InvalidInputException if the book type is null or the description is blank
+   * @throws NotFoundException if no discount exists for the specified book type
+   */
   public DiscountRecord updateDiscount(DiscountRq discountRq) {
     if (discountRq.getBookType() == null)
       throw new InvalidInputException("Book type cannot be null!");
