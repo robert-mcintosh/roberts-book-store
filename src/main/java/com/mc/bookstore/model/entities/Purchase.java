@@ -3,7 +3,6 @@ package com.mc.bookstore.model.entities;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,10 +27,14 @@ public class Purchase {
   private double totalPrice;
 
   @Column(name = "refunded")
-  private char refunded; //Maps 'Y' or 'N' to boolean
+  private char refunded; // Maps 'Y' or 'N' to boolean
 
-//  @OneToMany(mappedBy = "purchaseId", cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = PurchaseItem.class)
-//  private List<PurchaseItem> items = new ArrayList<>();
+  @OneToMany(
+      mappedBy = "purchaseId",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      targetEntity = PurchaseItem.class)
+  private List<PurchaseItem> items = new ArrayList<>();
 
   public boolean getRefunded() {
     return refunded == 'Y';
@@ -41,14 +44,13 @@ public class Purchase {
     this.refunded = refunded ? 'Y' : 'N';
   }
 
-//  public void addItem(PurchaseItem item) {
-//    items.add(item);
-//    item.setPurchase(this);
-//  }
-//
-//  public void removeItem(PurchaseItem item) {
-//    items.remove(item);
-//    item.setPurchase(null);
-//  }
+  public void addItem(PurchaseItem item) {
+    items.add(item);
+    item.setPurchase(this);
+  }
 
+  public void removeItem(PurchaseItem item) {
+    items.remove(item);
+    item.setPurchase(null);
+  }
 }

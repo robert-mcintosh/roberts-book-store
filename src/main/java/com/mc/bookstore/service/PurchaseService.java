@@ -8,8 +8,8 @@ import com.mc.bookstore.repository.DiscountRepository;
 import com.mc.bookstore.repository.PurchaseItemRepository;
 import com.mc.bookstore.repository.PurchaseRepository;
 import java.util.*;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class PurchaseService {
@@ -35,9 +35,8 @@ public class PurchaseService {
   }
 
   /**
-   * Retrieves the purchase record for the specified purchase ID.
-   * This method fetches the purchase details and associated purchase items
-   * and converts them into a {@link PurchaseRecord}.
+   * Retrieves the purchase record for the specified purchase ID. This method fetches the purchase
+   * details and associated purchase items and converts them into a {@link PurchaseRecord}.
    *
    * @param id the ID of the purchase to retrieve
    * @return the {@link PurchaseRecord} containing the purchase details and items
@@ -45,16 +44,15 @@ public class PurchaseService {
    */
   public PurchaseRecord getPurchase(Long id) {
 
-    // get the PURCHASE
     Purchase purchase = purchaseRepository.findById(id).orElse(null);
+
     if (purchase == null) throw new NotFoundException("Purchase does not exist!");
+    if (purchase.getItems() == null) throw new NotFoundException("Purchase items not found!");
 
-//    get the PURCHASE_ITEMS
-    List<PurchaseItem> purchaseItems = purchaseItemRepository.findByPurchaseId(id);
-    if (CollectionUtils.isEmpty(purchaseItems)) throw new NotFoundException("Purchase items not found!");
+    // Explicitly initialize the 'items' collection
+    Hibernate.initialize(purchase.getItems());
 
-    return toPurchaseRecord(purchase, purchaseItems);
-
+    return toPurchaseRecord(purchase);
   }
 
   public PurchaseRecord makePurchase(Long customerId, List<Long> bookIds) {
@@ -69,7 +67,7 @@ public class PurchaseService {
     PurchaseRecord purchaseRecord = new PurchaseRecord();
     purchaseRecord.setCustomerId(customer.getId());
 
-    {// save to generate an ID for the purchase
+    { // save to generate an ID for the purchase
       Purchase temporaryPurchase = purchaseRecord;
       purchaseRepository.saveAndFlush(temporaryPurchase);
       purchaseRecord.setPurchaseId(temporaryPurchase.getPurchaseId());
@@ -133,24 +131,23 @@ public class PurchaseService {
   }
 
   /**
-   * Creates a PurchaseRecord from the provided entities
+   * Creates a PurchaseRecord by adding the customer info
    *
-   * @param purchase      the purchase entity
-   * @param purchaseItems the associated purchase items
+   * @param purchase the purchase entity
    * @return a populated PurchaseRecord
    */
-  private PurchaseRecord toPurchaseRecord(Purchase purchase, List<PurchaseItem> purchaseItems) {
+  private PurchaseRecord toPurchaseRecord(Purchase purchase) {
     PurchaseRecord purchaseRecord = new PurchaseRecord();
     purchaseRecord.setPurchaseId(purchase.getPurchaseId());
     purchaseRecord.setCustomerId(purchase.getCustomerId());
     purchaseRecord.setTotalPrice(purchase.getTotalPrice());
-    purchaseRecord.setItems(purchaseItems); // Populate items
+    purchaseRecord.setRefunded(purchaseRecord.getRefunded());
+    purchaseRecord.setItems(purchase.getItems());
 
     // add customer info to the record
-    Customer customer = customerService.getCustomer(purchaseRecord.getCustomerId());
-    if( customer != null ) purchaseRecord.setCustomerInfo(customer);
+    Customer customer = customerService.getCustomer(purchase.getCustomerId());
+    if (customer != null) purchaseRecord.setCustomerInfo(customer);
 
     return purchaseRecord;
   }
-
 }

@@ -1,7 +1,6 @@
 package com.mc.bookstore.model.entities;
 
 import javax.persistence.*;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +20,10 @@ public class PurchaseItem {
   @Column(name = "purchase_id")
   private Long purchaseId;
 
+  @ManyToOne(targetEntity = Purchase.class, fetch = FetchType.EAGER) //
+  @JoinColumn(name = "purchase", nullable = true) // Foreign key
+  private Purchase purchase;
+
   @Column(name = "book_id")
   private Long bookId;
 
@@ -29,6 +32,4 @@ public class PurchaseItem {
 
   @Column(name = "discount_price")
   private double discountPrice;
-
-
 }
