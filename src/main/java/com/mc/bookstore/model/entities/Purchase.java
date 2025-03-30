@@ -1,5 +1,6 @@
 package com.mc.bookstore.model.entities;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
@@ -7,6 +8,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity(name = "Purchase")
 @Data
@@ -35,6 +38,14 @@ public class Purchase {
       orphanRemoval = true,
       targetEntity = PurchaseItem.class)
   private List<PurchaseItem> items = new ArrayList<>();
+
+  @Column(name = "create_date")
+  @CreationTimestamp
+  private LocalDateTime createDate;
+
+  @Column(name = "update_date")
+  @UpdateTimestamp
+  private LocalDateTime updateDate;
 
   /*
    * custom getters and setters

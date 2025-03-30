@@ -16,6 +16,8 @@ public class DiscountRecord extends Discount {
     this.setDiscountPercentage(discount.getDiscountPercentage());
     this.setBundleDiscountPercentage(discount.getBundleDiscountPercentage());
     this.setLoyaltyEligible(discount.getLoyaltyEligible());
+    this.setCreateDate(discount.getCreateDate());
+    this.setUpdateDate(discount.getUpdateDate());
     return this;
   }
 }

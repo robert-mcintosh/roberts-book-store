@@ -1,5 +1,6 @@
 
-INSERT INTO book (title, author, qty, price, type) VALUES ('Game Theory', 'Brian Clegg', 10, 250.0, 'NEW');
+INSERT INTO book (title, author, qty, price, type)
+VALUES ('Game Theory', 'Brian Clegg', 10, 250.0, 'NEW');
 INSERT INTO book (title, author, qty, price, type) VALUES ('In Too Deep', 'Lee Child', 10, 250.0, 'NEW');
 INSERT INTO book (title, author, qty, price, type) VALUES ('The Unicorn Project', 'Gene Kim', 10, 200.0, 'NEW');
 

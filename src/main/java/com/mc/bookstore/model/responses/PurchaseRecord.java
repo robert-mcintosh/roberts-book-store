@@ -1,6 +1,7 @@
 package com.mc.bookstore.model.responses;
 
 import com.mc.bookstore.model.entities.Purchase;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
@@ -17,6 +18,8 @@ public class PurchaseRecord {
   private Long customerId;
   private double totalPrice;
   private boolean refunded; // Maps 'Y' or 'N' to boolean
+  private LocalDateTime createDate;
+  private LocalDateTime updateDate;
 
   private List<PurchaseItemRecord> purchaseItems = new ArrayList<>();
   private CustomerRecord customerInfo;
@@ -26,6 +29,8 @@ public class PurchaseRecord {
     this.setCustomerId(purchase.getCustomerId());
     this.setTotalPrice(purchase.getTotalPrice());
     this.setRefunded(purchase.getRefunded());
+    this.setCreateDate(purchase.getCreateDate());
+    this.setUpdateDate(purchase.getUpdateDate());
     purchase
         .getItems()
         .forEach(

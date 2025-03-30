@@ -14,6 +14,8 @@ public class CustomerRecord extends Customer {
     this.setId(customer.getId());
     this.setName(customer.getName());
     this.setLoyaltyPoints(customer.getLoyaltyPoints());
+    this.setCreateDate(customer.getCreateDate());
+    this.setUpdateDate(customer.getUpdateDate());
     return this;
   }
 }

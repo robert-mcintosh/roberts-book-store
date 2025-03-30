@@ -17,6 +17,8 @@ public class BookRecord extends Book {
     this.setQty(book.getQty());
     this.setPrice(book.getPrice());
     this.setType(book.getType());
+    this.setCreateDate(book.getCreateDate());
+    this.setUpdateDate(book.getUpdateDate());
     return this;
   }
 }

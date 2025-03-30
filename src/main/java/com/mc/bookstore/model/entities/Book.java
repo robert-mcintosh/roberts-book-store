@@ -2,11 +2,14 @@ package com.mc.bookstore.model.entities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "book")
@@ -26,6 +29,14 @@ public class Book {
 
   @Column(nullable = false)
   private String type; // NEW, REG, OLD
+
+  @Column(name = "create_date")
+  @CreationTimestamp
+  private LocalDateTime createDate;
+
+  @Column(name = "update_date")
+  @UpdateTimestamp
+  private LocalDateTime updateDate;
 
   public Book(String title, String author, double price, String type, int qty) {
     this.title = title;

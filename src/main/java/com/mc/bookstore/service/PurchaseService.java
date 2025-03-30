@@ -1,5 +1,6 @@
 package com.mc.bookstore.service;
 
+import com.mc.bookstore.config.exceptions.InvalidInputException;
 import com.mc.bookstore.config.exceptions.NotFoundException;
 import com.mc.bookstore.model.entities.*;
 import com.mc.bookstore.model.responses.CustomerRecord;
@@ -9,7 +10,6 @@ import com.mc.bookstore.repository.DiscountRepository;
 import com.mc.bookstore.repository.PurchaseRepository;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
@@ -116,6 +116,9 @@ public class PurchaseService {
     Purchase purchase = purchaseRepository.getReferenceById(purchaseId);
     if (purchase == null) throw new NotFoundException("Purchase does not exist!");
 
+    if (purchase.getRefunded())
+      throw new InvalidInputException("Purchase has already been refunded!");
+
     List<PurchaseItem> purchaseItems = purchase.getItems();
 
     AtomicInteger countOfItemsRefunded = new AtomicInteger(purchaseItems.size());
@@ -160,7 +163,7 @@ public class PurchaseService {
   private double calculateTotalPrice(Purchase purchase, List<Book> books, Customer customer) {
     /*
      * This is the brain of the operation
-    */
+     */
     double totalDiscountPrice = 0.0;
 
     // get all the discount types and store them in a map to limit db access
@@ -228,9 +231,9 @@ public class PurchaseService {
   }
 
   /**
-   * Converts a {@link Purchase} into a {@link PurchaseRecord} by retrieving the associated
-   * {@link Customer} details and populating the {@link PurchaseRecord} with combined purchase
-   * and customer information.
+   * Converts a {@link Purchase} into a {@link PurchaseRecord} by retrieving the associated {@link
+   * Customer} details and populating the {@link PurchaseRecord} with combined purchase and customer
+   * information.
    *
    * @param purchase the purchase entity containing purchase details
    * @return a {@link PurchaseRecord} containing combined purchase and customer information
