@@ -98,12 +98,9 @@ Contributions are welcome! To contribute:
    ```
 5. Open a pull request.
 
-## License
-
-This project is licensed under the [Specify License, e.g., MIT License]. See the `LICENSE` file for more details.
 
 ## Contact
 
-For questions or support, you can contact r.mcintosh@rocketmail.com.
+For questions or support, you can contact owner.
 
 ---
