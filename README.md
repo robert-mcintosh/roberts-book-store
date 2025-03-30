@@ -10,23 +10,17 @@ management process.
 
 - **Inventory Management**
     - Add, remove, and update books in the inventory.
-    - Track stock levels and information about each book such as title, author, genre, and price.
+  - Track stock levels and information about each book such as title, author, quantity, category and price.
+  - View and maintain Book discount categories
 
 - **Sales Tracking**
     - Handle purchase transactions.
     - Record sales data for analysis and reporting.
+  - Handle refunds for orders
 
 - **Customer Management**
     - Maintain a database of customers.
-    - View customer purchase history.
-
-- **Search and Recommendations**
-    - Search for books by title, author, genre, or keywords.
-    - Provide recommendations based on customer preferences.
-
-- **User Roles**
-    - Provide admin functionalities for managing books and reports.
-    - Offer a simplified interface for customers.
+  - View and maintain loyalty points
 
 ## Technologies Used
 

@@ -34,9 +34,9 @@ public class DiscountControllerTests {
     // Arrange
     List<Discount> discounts =
         Arrays.asList(
-            new Discount("NEW", "New Release", 0, 0, 'N'),
-            new Discount("REG", "Regular", 0, 10, 'Y'),
-            new Discount("OLD", "Old Edition", 20, 5, 'Y'));
+            new Discount("NEW", "New Release", 0, 0, 'N', null, null),
+            new Discount("REG", "Regular", 0, 10, 'Y', null, null),
+            new Discount("OLD", "Old Edition", 20, 5, 'Y', null, null));
 
     List<DiscountRecord> discountRecords = new ArrayList<>();
     discounts.forEach(

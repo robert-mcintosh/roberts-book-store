@@ -37,8 +37,8 @@ public class BookControllerTests {
     // Arrange
     List<Book> books =
         Arrays.asList(
-            new Book(1L, "Title1", "Author1", 5, 100.0, "REG"),
-            new Book(2L, "Title2", "Author2", 10, 150.0, "REG"));
+            new Book(1L, "Title1", "Author1", 5, 100.0, "REG", null, null),
+            new Book(2L, "Title2", "Author2", 10, 150.0, "REG", null, null));
 
     List<BookRecord> bookRecords = new ArrayList<>();
     books.forEach(book -> bookRecords.add(new BookRecord().populateFromBook(book)));
@@ -59,7 +59,7 @@ public class BookControllerTests {
   @Test
   public void testAddBook() throws Exception {
     // Arrange
-    Book book = new Book(null, "Title1", "Author1", 5, 100.0, "REG");
+    Book book = new Book(null, "Title1", "Author1", 5, 100.0, "REG", null, null);
 
     BookRq bookRq = populateBookRqFromBook(book);
     BookRecord bookRecord = new BookRecord().populateFromBook(book);
@@ -90,7 +90,7 @@ public class BookControllerTests {
   @Test
   public void testUpdateBook() throws Exception {
     // Arrange
-    Book book = new Book(1L, "UpdatedTitle", "UpdatedAuthor", 7, 120.0, "REG");
+    Book book = new Book(1L, "UpdatedTitle", "UpdatedAuthor", 7, 120.0, "REG", null, null);
     BookRq bookRq = populateBookRqFromBook(book);
     BookRecord updatedBookRecord = new BookRecord().populateFromBook(book);
 
