@@ -72,13 +72,12 @@ Once the application is running, users can interact with it to:
 Assumptions made along the way:
 
 - The discount is applied on the cart size - not the quantity if any particular type
-- Loyalty points cannot be used immediately, i.e. they get redeemed before the latest order accrues
+- Loyalty points cannot be used immediately, i.e. they get redeemed before the latest order accrues it's points
 - Adding or removing of Book Discount categories will remain manual via SQL
 
 Not catered for:
 
 - Purchasing multiple of the same book in one transaction
--
 
 ## Contributing
 
